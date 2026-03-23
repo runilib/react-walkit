@@ -1,23 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ReactDOM from "react-dom";
-import { getSpotlightRect } from "src/utils/positioning.shared";
-import { computeTooltipPosition } from "src/utils/Walk.positioning";
-import { WEB_KEYFRAMES } from "../../../animations";
-import type { OverlayProps, SpotlightRect } from "../../../types/Walk.types";
-import { Tooltip } from "./Walk.web";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
+
+import { getSpotlightRect } from 'src/utils/positioning.shared';
+import { computeTooltipPosition } from 'src/utils/Walkit.positioning';
+import { WEB_KEYFRAMES } from '../../../animations';
+import type { OverlayProps, SpotlightRect } from '../../../types/Walkit.types';
+import { Tooltip } from './Walkit.web';
 
 const TOOLTIP_WIDTH = 300;
 const TOOLTIP_HEIGHT = 180;
-const INJECT_ID = "__uc_styles__";
-const PORTAL_ID = "__uc_portal__";
+const INJECT_ID = '__uc_styles__';
+const PORTAL_ID = '__uc_portal__';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function injectStyles(): void {
   if (document.getElementById(INJECT_ID)) return;
-  const style = document.createElement("style");
+  const style = document.createElement('style');
   style.id = INJECT_ID;
-  style.type = "text/css";
+  style.type = 'text/css';
   style.textContent = WEB_KEYFRAMES;
   document.head.appendChild(style);
 }
@@ -25,7 +26,7 @@ function injectStyles(): void {
 function getOrCreatePortal(): HTMLElement {
   let element = document.getElementById(PORTAL_ID);
   if (!element) {
-    element = document.createElement("div");
+    element = document.createElement('div');
     element.id = PORTAL_ID;
     document.body.appendChild(element);
   }
@@ -46,8 +47,8 @@ function useDimensions(): { w: number; h: number } {
       });
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return dimensions;
@@ -66,15 +67,15 @@ function easeOut(t: number): number {
 export const WebOverlay = ({
   visible,
   currentRect,
-  currentWalkStep,
-  walkStepIndex,
-  totalWalkSteps,
+  currentWalkitStep,
+  walkitStepIndex,
+  totalWalkitSteps,
   animationType,
   overlayColor,
   spotlightPadding,
   spotlightBorderRadius,
   theme,
-  walkStyle,
+  walkitStyle,
   renderPopover,
   stopOnOutsideClick,
   labels,
@@ -101,18 +102,18 @@ export const WebOverlay = ({
   }, [currentRect, spotlightPadding, spotlightBorderRadius]);
 
   const tooltipPos = useMemo(() => {
-    if (!visible || !spotlightTarget || !currentWalkStep) {
+    if (!visible || !spotlightTarget || !currentWalkitStep) {
       return null;
     }
 
     return computeTooltipPosition(
       spotlightTarget,
       tooltipSize,
-      currentWalkStep.placement ?? "auto",
+      currentWalkitStep.placement ?? 'auto',
       dimensions.w,
-      dimensions.h
+      dimensions.h,
     );
-  }, [visible, spotlightTarget, currentWalkStep, tooltipSize, dimensions]);
+  }, [visible, spotlightTarget, currentWalkitStep, tooltipSize, dimensions]);
 
   const animateSpotlight = useCallback((from: SpotlightRect, to: SpotlightRect): void => {
     cancelAnimationFrame(animationFrameRef.current);
@@ -163,17 +164,17 @@ export const WebOverlay = ({
     return null;
   }
 
-  const fill = overlayColor ?? "rgba(15,15,25,0.72)";
+  const fill = overlayColor ?? 'rgba(15,15,25,0.72)';
   const portal = getOrCreatePortal();
 
   const content = (
     <div
       style={{
-        position: "fixed",
+        position: 'fixed',
         inset: 0,
         zIndex: 999990,
-        animation: "runilib-react-walkit-overlay-in 0.25s ease-out both",
-        pointerEvents: "none",
+        animation: 'runilib-react-walkit-overlay-in 0.25s ease-out both',
+        pointerEvents: 'none',
       }}
     >
       {stopOnOutsideClick && (
@@ -182,24 +183,24 @@ export const WebOverlay = ({
           aria-label="Close tour overlay"
           onClick={onStop}
           style={{
-            position: "absolute",
+            position: 'absolute',
             inset: 0,
-            border: "none",
+            border: 'none',
             padding: 0,
             margin: 0,
-            background: "transparent",
-            appearance: "none",
-            cursor: "default",
-            pointerEvents: "auto",
+            background: 'transparent',
+            appearance: 'none',
+            cursor: 'default',
+            pointerEvents: 'auto',
           }}
         />
       )}
 
       <svg
         style={{
-          position: "absolute",
+          position: 'absolute',
           inset: 0,
-          pointerEvents: "none",
+          pointerEvents: 'none',
         }}
         width={dimensions.w}
         height={dimensions.h}
@@ -209,7 +210,13 @@ export const WebOverlay = ({
       >
         <defs>
           <mask id="uc-mask">
-            <rect x={0} y={0} width={dimensions.w} height={dimensions.h} fill="white" />
+            <rect
+              x={0}
+              y={0}
+              width={dimensions.w}
+              height={dimensions.h}
+              fill="white"
+            />
             {spot && (
               <rect
                 x={spot.x}
@@ -246,22 +253,22 @@ export const WebOverlay = ({
         )}
       </svg>
 
-      {tooltipPos && currentWalkStep && (
+      {tooltipPos && currentWalkitStep && (
         <div
           style={{
-            position: "relative",
+            position: 'relative',
             zIndex: 1,
-            pointerEvents: "auto",
+            pointerEvents: 'auto',
           }}
         >
           <Tooltip
-            walkStep={currentWalkStep}
-            walkStepIndex={walkStepIndex}
-            totalWalkSteps={totalWalkSteps}
-            walkStepPos={tooltipPos}
+            walkitStep={currentWalkitStep}
+            walkitStepIndex={walkitStepIndex}
+            totalWalkitSteps={totalWalkitSteps}
+            walkitStepPos={tooltipPos}
             animationType={animationType}
             theme={theme}
-            walkStyle={walkStyle}
+            walkitStyle={walkitStyle}
             renderPopover={renderPopover}
             labels={labels}
             onNext={onNext}

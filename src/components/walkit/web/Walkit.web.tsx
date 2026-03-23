@@ -1,48 +1,59 @@
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 
-import { getWebAnimation } from "../../../animations";
-import type { Placement, WalkPopoverProps, WalkTheme } from "../../../types/Walk.types";
+import { getWebAnimation } from '../../../animations';
+import type {
+  Placement,
+  WalkitPopoverProps,
+  WalkitTheme,
+} from '../../../types/Walkit.types';
 
 // ─── Default theme ────────────────────────────────────────────────────────────
-const DEFAULT_THEME: Required<WalkTheme> = {
-  primaryButtonColor: "#6366f1",
-  primaryButtonTextColor: "#ffffff",
-  background: "#ffffff",
-  titleColor: "#1e1e2e",
-  subTitleColor: "#6b7280",
-  border: "#e5e7eb",
-  shadow: "",
-  borderRadius: "14px",
+const DEFAULT_THEME: Required<WalkitTheme> = {
+  primaryButtonColor: '#6366f1',
+  primaryButtonTextColor: '#ffffff',
+  background: '#ffffff',
+  titleColor: '#1e1e2e',
+  subTitleColor: '#6b7280',
+  border: '#e5e7eb',
+  shadow: '',
+  borderRadius: '14px',
 };
 
 export const Tooltip = ({
-  walkStep,
-  walkStepIndex,
-  totalWalkSteps,
-  walkStepPos,
-  animationType = "slide",
+  walkitStep,
+  walkitStepIndex,
+  totalWalkitSteps,
+  walkitStepPos,
+  animationType = 'slide',
   theme: themeProp,
-  walkStyle,
+  walkitStyle,
   renderPopover,
   labels = {},
   onNext,
   onPrev,
   onStop,
   onMeasure,
-}: WalkPopoverProps) => {
+}: WalkitPopoverProps) => {
   const theme = { ...DEFAULT_THEME, ...themeProp };
   const [ready, setReady] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Re-trigger animation on step change
+  const animationResetKey = `${walkitStepIndex}-${walkitStep.id}-${animationType}`;
+
   useEffect(() => {
+    void animationResetKey;
+
     setReady(false);
     const raf = requestAnimationFrame(() => setReady(true));
-    return () => cancelAnimationFrame(raf);
-  }, [walkStepIndex, walkStep.id, animationType]);
 
-  // Measure real tooltip size
+    return () => cancelAnimationFrame(raf);
+  }, [animationResetKey]);
+
+  const measureKey = `${walkitStepIndex}-${walkitStep.id}`;
   useEffect(() => {
+    void measureKey;
+
     const element = containerRef.current;
     if (!element || !onMeasure) {
       return;
@@ -64,51 +75,63 @@ export const Tooltip = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [onMeasure]);
+  }, [onMeasure, measureKey]);
 
-  const isFirst = walkStepIndex === 0;
-  const isLast = walkStepIndex === totalWalkSteps - 1;
-  const { placement, arrowOffset = 0 } = walkStepPos;
-  const animation = ready ? getWebAnimation(animationType, placement) : "none";
+  const isFirst = walkitStepIndex === 0;
+  const isLast = walkitStepIndex === totalWalkitSteps - 1;
+  const { placement, arrowOffset = 0 } = walkitStepPos;
+  const animation = ready ? getWebAnimation(animationType, placement) : 'none';
   const arrowStyle = buildArrowStyle(placement, arrowOffset, theme.background);
 
   const containerStyle: CSSProperties = {
-    position: "fixed",
-    top: walkStepPos.top,
-    left: walkStepPos.left,
+    position: 'fixed',
+    top: walkitStepPos.top,
+    left: walkitStepPos.left,
     width: 300,
     background: theme.background,
     borderRadius: theme.borderRadius,
     boxShadow: theme.shadow,
-    padding: "20px",
+    padding: '20px',
     zIndex: 999999,
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     animation,
     border: `1px solid ${theme.border}`,
-    ...(walkStyle as CSSProperties),
+    ...(walkitStyle as CSSProperties),
   };
 
   if (renderPopover) {
     return (
-      <div ref={containerRef} style={containerStyle}>
-        {renderPopover({ walkStep, walkStepIndex, totalWalkSteps, onNext, onPrev, onStop })}
+      <div
+        ref={containerRef}
+        style={containerStyle}
+      >
+        {renderPopover({
+          walkitStep,
+          walkitStepIndex,
+          totalWalkitSteps,
+          onNext,
+          onPrev,
+          onStop,
+        })}
         <div style={arrowStyle} />
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} style={containerStyle}>
+    <div
+      ref={containerRef}
+      style={containerStyle}
+    >
       {/* Header */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
+          display: 'flex',
+          alignItems: 'flex-start',
           marginBottom: 12,
         }}
       >
-        {walkStep.title && (
+        {walkitStep.title && (
           <p
             style={{
               margin: 0,
@@ -118,7 +141,7 @@ export const Tooltip = ({
               lineHeight: 1.3,
             }}
           >
-            {walkStep.title}
+            {walkitStep.title}
           </p>
         )}
 
@@ -126,59 +149,68 @@ export const Tooltip = ({
           type="button"
           onClick={onStop}
           style={closeButtonStyle(theme)}
-          aria-label={labels.close ?? "Close"}
-          title={labels.close ?? "Close"}
+          aria-label={labels.close ?? 'Close'}
+          title={labels.close ?? 'Close'}
         >
           ✕
         </button>
       </div>
 
       {/* Body */}
-      {walkStep.text && (
+      {walkitStep.content && (
         <p
           style={{
-            margin: "0 0 16px",
+            margin: '0 0 16px',
             fontSize: 13.5,
             color: theme.subTitleColor,
             lineHeight: 1.6,
           }}
         >
-          {walkStep.text}
+          {walkitStep.content}
         </p>
       )}
 
       {/* Footer */}
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
-        <div style={{ display: "flex", gap: 5 }}>
-          {Array.from({ length: totalWalkSteps }).map((item, i) => (
+        <div style={{ display: 'flex', gap: 5 }}>
+          {Array.from({ length: totalWalkitSteps }).map((item, i) => (
             <div
               key={`${item}-${i.toString()}`}
               style={{
-                width: i === walkStepIndex ? 18 : 6,
+                width: i === walkitStepIndex ? 18 : 6,
                 height: 6,
                 borderRadius: 3,
-                background: i === walkStepIndex ? theme.primaryButtonColor : theme.border,
-                transition: "all 0.25s ease",
+                background:
+                  i === walkitStepIndex ? theme.primaryButtonColor : theme.border,
+                transition: 'all 0.25s ease',
               }}
             />
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
           {!isFirst && (
-            <button type="button" onClick={onPrev} style={secondaryButtonStyle(theme)}>
-              {labels.prev ?? "← Back"}
+            <button
+              type="button"
+              onClick={onPrev}
+              style={secondaryButtonStyle(theme)}
+            >
+              {labels.prev ?? '← Back'}
             </button>
           )}
 
-          <button type="button" onClick={onNext} style={primaryButtonStyle(theme)}>
-            {isLast ? (labels.finish ?? "Finish 🎉") : (labels.next ?? "Next →")}
+          <button
+            type="button"
+            onClick={onNext}
+            style={primaryButtonStyle(theme)}
+          >
+            {isLast ? (labels.finish ?? 'Finish 🎉') : (labels.next ?? 'Next →')}
           </button>
         </div>
       </div>
@@ -189,100 +221,104 @@ export const Tooltip = ({
 };
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
-function closeButtonStyle(t: Required<WalkTheme>): CSSProperties {
+function closeButtonStyle(t: Required<WalkitTheme>): CSSProperties {
   return {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
     color: t.subTitleColor,
     fontSize: 14,
     lineHeight: 1,
-    padding: "2px 4px",
+    padding: '2px 4px',
     borderRadius: 4,
     flexShrink: 0,
-    marginLeft: 8,
+    marginLeft: 'auto',
     marginTop: -2,
     opacity: 0.7,
   };
 }
 
-function primaryButtonStyle(t: Required<WalkTheme>): CSSProperties {
+function primaryButtonStyle(t: Required<WalkitTheme>): CSSProperties {
   return {
     background: t.primaryButtonColor,
     color: t.primaryButtonTextColor,
-    border: "none",
-    borderRadius: "8px",
-    padding: "7px 14px",
+    border: 'none',
+    borderRadius: '8px',
+    padding: '7px 14px',
     fontSize: 13,
     fontWeight: 600,
-    cursor: "pointer",
-    letterSpacing: "0.01em",
+    cursor: 'pointer',
+    letterSpacing: '0.01em',
   };
 }
 
-function secondaryButtonStyle(t: Required<WalkTheme>): CSSProperties {
+function secondaryButtonStyle(t: Required<WalkitTheme>): CSSProperties {
   return {
-    background: "transparent",
+    background: 'transparent',
     color: t.subTitleColor,
     border: `1px solid ${t.border}`,
-    borderRadius: "8px",
-    padding: "7px 12px",
+    borderRadius: '8px',
+    padding: '7px 12px',
     fontSize: 13,
     fontWeight: 500,
-    cursor: "pointer",
+    cursor: 'pointer',
   };
 }
 
-function buildArrowStyle(placement: Placement, offset: number, color: string): CSSProperties {
+function buildArrowStyle(
+  placement: Placement,
+  offset: number,
+  color: string,
+): CSSProperties {
   const size = 10;
 
   const base: CSSProperties = {
-    position: "absolute",
+    position: 'absolute',
     width: 0,
     height: 0,
-    pointerEvents: "none",
+    pointerEvents: 'none',
   };
 
   switch (placement) {
-    case "bottom":
+    case 'bottom':
       return {
         ...base,
         top: -size,
         left: offset,
-        transform: "translateX(-50%)",
+        transform: 'translateX(-50%)',
         borderLeft: `${size}px solid transparent`,
         borderRight: `${size}px solid transparent`,
         borderBottom: `${size}px solid ${color}`,
       };
 
-    case "top":
+    case 'top':
       return {
         ...base,
         bottom: -size,
         left: offset,
-        transform: "translateX(-50%)",
+        transform: 'translateX(-50%)',
         borderLeft: `${size}px solid transparent`,
         borderRight: `${size}px solid transparent`,
         borderTop: `${size}px solid ${color}`,
       };
 
-    case "right":
+    case 'right':
       return {
         ...base,
         top: offset,
         left: -size,
-        transform: "translateY(-50%)",
+        transform: 'translateY(-50%)',
         borderTop: `${size}px solid transparent`,
         borderBottom: `${size}px solid transparent`,
         borderRight: `${size}px solid ${color}`,
       };
 
-    case "left":
+    case 'left':
       return {
         ...base,
         top: offset,
         right: -size,
-        transform: "translateY(-50%)",
+        transform: 'translateY(-50%)',
         borderTop: `${size}px solid transparent`,
         borderBottom: `${size}px solid transparent`,
         borderLeft: `${size}px solid ${color}`,

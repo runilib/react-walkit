@@ -1,30 +1,47 @@
-import { createContext, type ReactNode, useCallback, useContext, useRef, useState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from 'react';
 
-import type { TargetRect, WalkConfig, WalkContextValue, WalkStepData } from "../types/Walk.types";
+import type {
+  TargetRect,
+  WalkitConfig,
+  WalkitContextValue,
+  WalkitStepData,
+} from '../types/Walkit.types';
 
-const WalkContext = createContext<WalkContextValue | null>(null);
+const WalkitContext = createContext<WalkitContextValue | null>(null);
 
 interface TooltipContextProviderProps {
   children: ReactNode;
-  config: WalkConfig;
+  config: WalkitConfig;
 }
 
-const sortSteps = (stepMap: Record<string, WalkStepData>): WalkStepData[] =>
-  Object.values(stepMap).sort((firstStep, secondStep) => firstStep.order - secondStep.order);
+const sortSteps = (stepMap: Record<string, WalkitStepData>): WalkitStepData[] =>
+  Object.values(stepMap).sort(
+    (firstStep, secondStep) => firstStep.order - secondStep.order,
+  );
 
-export const WalkContextProvider = ({ children, config }: TooltipContextProviderProps) => {
-  const stepsRef = useRef<Record<string, WalkStepData>>({});
+export const WalkitContextProvider = ({
+  children,
+  config,
+}: TooltipContextProviderProps) => {
+  const stepsRef = useRef<Record<string, WalkitStepData>>({});
   const configRef = useRef(config);
   const activationIdRef = useRef(0);
 
   configRef.current = config;
 
-  const [sortedSteps, setSortedSteps] = useState<WalkStepData[]>([]);
+  const [sortedSteps, setSortedSteps] = useState<WalkitStepData[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [visible, setVisible] = useState<boolean>(false);
   const [currentRect, setCurrentRect] = useState<TargetRect | null>(null);
 
-  const registerStep = useCallback((step: WalkStepData): void => {
+  const registerStep = useCallback((step: WalkitStepData): void => {
     stepsRef.current[step.id] = step;
     setSortedSteps(sortSteps(stepsRef.current));
   }, []);
@@ -35,7 +52,7 @@ export const WalkContextProvider = ({ children, config }: TooltipContextProvider
   }, []);
 
   const measureAndShow = useCallback(
-    async (index: number, providedSteps?: WalkStepData[]): Promise<void> => {
+    async (index: number, providedSteps?: WalkitStepData[]): Promise<void> => {
       const steps = providedSteps ?? sortSteps(stepsRef.current);
       const step = steps[index];
 
@@ -72,19 +89,22 @@ export const WalkContextProvider = ({ children, config }: TooltipContextProvider
         setCurrentRect(null);
         setVisible(false);
 
-        console.warn(`[runilib/react-walkit] Failed to measure step "${step.id}".`, error);
+        console.warn(
+          `[runilib/react-walkit] Failed to measure step "${step.id}".`,
+          error,
+        );
       }
     },
-    []
+    [],
   );
 
   const activateStep = useCallback(
     async (
       index: number,
-      providedSteps?: WalkStepData[],
+      providedSteps?: WalkitStepData[],
       options?: {
         emitStepChange?: boolean;
-      }
+      },
     ): Promise<void> => {
       const steps = providedSteps ?? sortSteps(stepsRef.current);
       const step = steps[index];
@@ -99,7 +119,7 @@ export const WalkContextProvider = ({ children, config }: TooltipContextProvider
         configRef.current.onStepChange?.(step, index);
       }
     },
-    [measureAndShow]
+    [measureAndShow],
   );
 
   const start = useCallback(
@@ -122,7 +142,7 @@ export const WalkContextProvider = ({ children, config }: TooltipContextProvider
       configRef.current.onStart?.();
       await activateStep(nextIndex, steps);
     },
-    [activateStep]
+    [activateStep],
   );
 
   const stop = useCallback((): void => {
@@ -174,12 +194,12 @@ export const WalkContextProvider = ({ children, config }: TooltipContextProvider
 
       await activateStep(index, steps);
     },
-    [activateStep]
+    [activateStep],
   );
 
   const currentStep = sortedSteps[currentIndex] ?? null;
 
-  const value: WalkContextValue = {
+  const value: WalkitContextValue = {
     sortedSteps,
     currentIndex,
     currentStep,
@@ -196,14 +216,16 @@ export const WalkContextProvider = ({ children, config }: TooltipContextProvider
     measureAndShow,
   };
 
-  return <WalkContext.Provider value={value}>{children}</WalkContext.Provider>;
+  return <WalkitContext.Provider value={value}>{children}</WalkitContext.Provider>;
 };
 
-export function useWalkContext(): WalkContextValue {
-  const context = useContext(WalkContext);
+export function useWalkitContext(): WalkitContextValue {
+  const context = useContext(WalkitContext);
 
   if (!context) {
-    throw new Error("[runilib/react-walkit] useWalkContext must be used inside <WalkProvider>.");
+    throw new Error(
+      '[runilib/react-walkit] useWalkitContext must be used inside <WalkitProvider>.',
+    );
   }
 
   return context;

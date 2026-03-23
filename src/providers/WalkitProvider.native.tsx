@@ -1,23 +1,23 @@
-import { WalkOverlayBridge } from "../components/overlay/Overlay.web";
-import { WalkContextProvider } from "../context/WalkContext";
-import type { WalkProviderProps } from "../types/Walk.types";
+import { WalkitOverlayBridge } from '../components/overlay/Overlay.native';
+import { WalkitContextProvider } from '../context/WalkitContext';
+import type { WalkitProviderProps } from '../types/Walkit.types';
 
 /**
- * `WalkProvider`
+ * `WalkitProvider`
  * ─────────────────
  * Wrap your app (or a screen) with this component to enable the onboarding tour.
  * Renders on both React (web) and React Native with the same props.
  *
  * @example
- * <WalkProvider animationType="bounce" theme={{ primary: "#10b981" }}>
+ * <WalkitProvider animationType="bounce" theme={{ primaryButtonColor: "#10b981" }}>
  *   <App />
- * </WalkProvider>
+ * </WalkitProvider>
  */
-export const WalkProvider = ({
+export const WalkitProvider = ({
   children,
-  animationType = "slide",
+  animationType = 'slide',
   theme,
-  walkStyle,
+  walkitStyle,
   overlayColor,
   spotlightPadding = 8,
   spotlightBorderRadius = 8,
@@ -27,12 +27,12 @@ export const WalkProvider = ({
   onStart,
   onStop,
   onStepChange,
-}: WalkProviderProps) => (
-  <WalkContextProvider config={{ onStart, onStop, onStepChange }}>
-    <WalkOverlayBridge
+}: WalkitProviderProps) => (
+  <WalkitContextProvider config={{ onStart, onStop, onStepChange }}>
+    <WalkitOverlayBridge
       animationType={animationType}
       theme={theme}
-      walkStyle={walkStyle}
+      walkitStyle={walkitStyle}
       overlayColor={overlayColor}
       spotlightPadding={spotlightPadding}
       spotlightBorderRadius={spotlightBorderRadius}
@@ -41,5 +41,5 @@ export const WalkProvider = ({
       renderPopover={renderPopover}
     />
     {children}
-  </WalkContextProvider>
+  </WalkitContextProvider>
 );

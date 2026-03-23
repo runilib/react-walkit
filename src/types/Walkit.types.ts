@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactNode } from 'react';
 
 // ─── Enums / Unions ───────────────────────────────────────────────────────────
 
@@ -9,7 +9,7 @@ import type { CSSProperties, ReactNode } from "react";
  * These values are consumed by the internal animation layer on both
  * web and React Native.
  */
-export type AnimationType = "fade" | "slide" | "zoom" | "bounce" | "flip" | "glow";
+export type AnimationType = 'fade' | 'slide' | 'zoom' | 'bounce' | 'flip' | 'glow';
 
 /**
  * Preferred placement of the popover relative to its target element.
@@ -18,7 +18,7 @@ export type AnimationType = "fade" | "slide" | "zoom" | "bounce" | "flip" | "glo
  *   available viewport or screen space.
  * - other values express a preferred side.
  */
-export type Placement = "auto" | "top" | "bottom" | "left" | "right";
+export type Placement = 'auto' | 'top' | 'bottom' | 'left' | 'right';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
@@ -29,7 +29,7 @@ export type Placement = "auto" | "top" | "bottom" | "left" | "right";
  * When `renderPopover` is used, consumers are responsible for styling
  * their custom content.
  */
-export interface WalkTheme {
+export interface WalkitTheme {
   /**
    * Background color of the primary action button.
    */
@@ -83,7 +83,7 @@ export interface WalkTheme {
  * These labels are ignored when a fully custom popover is rendered
  * through `renderPopover`.
  */
-export interface WalkLabels {
+export interface WalkitLabels {
   /**
    * Label for the next-step action.
    */
@@ -113,11 +113,11 @@ export interface WalkLabels {
 /**
  * Internal normalized representation of a registered walkthrough step.
  *
- * A step is created from `<WalkStep />` and stored in context once mounted.
+ * A step is created from `<WalkitStep />` and stored in context once mounted.
  * It contains display metadata as well as platform-specific measurement
  * hooks used by the overlay engine.
  */
-export interface WalkStepData {
+export interface WalkitStepData {
   /**
    * Unique step identifier.
    *
@@ -141,7 +141,7 @@ export interface WalkStepData {
   /**
    * Optional descriptive text displayed by the default popover.
    */
-  text?: string;
+  content?: string;
 
   /**
    * Preferred popover placement for this step.
@@ -149,7 +149,7 @@ export interface WalkStepData {
   placement?: Placement;
 
   /**
-   * Internal measurement function injected by `<WalkStep />`.
+   * Internal measurement function injected by `<WalkitStep />`.
    *
    * It resolves the current on-screen rectangle of the target element.
    * The library uses it to position the spotlight and popover.
@@ -203,12 +203,12 @@ export interface SpotlightRect extends TargetRect {
   borderRadius: number;
 }
 
-// ─── WalkStep position ─────────────────────────────────────────────────────────
+// ─── WalkitStep position ─────────────────────────────────────────────────────────
 
 /**
  * Final computed position of the popover relative to the active target.
  */
-export interface WalkStepPosition {
+export interface WalkitStepPosition {
   /**
    * Popover top offset in viewport / screen coordinates.
    */
@@ -239,27 +239,27 @@ export interface WalkStepPosition {
   arrowOffset: number;
 }
 
-// ─── Render WalkStep props ─────────────────────────────────────────────────────
+// ─── Render WalkitStep props ─────────────────────────────────────────────────────
 
 /**
  * Props passed to `renderPopover` when consumers want to fully customize
  * the walkthrough popover UI.
  */
-export interface RenderWalkStepProps {
+export interface RenderWalkitStepProps {
   /**
    * Currently active step metadata.
    */
-  walkStep: WalkStepData;
+  walkitStep: WalkitStepData;
 
   /**
    * Zero-based index of the active step.
    */
-  walkStepIndex: number;
+  walkitStepIndex: number;
 
   /**
    * Total number of registered walkthrough steps.
    */
-  totalWalkSteps: number;
+  totalWalkitSteps: number;
 
   /**
    * Moves to the next step or finishes the walkthrough if the current
@@ -283,7 +283,7 @@ export interface RenderWalkStepProps {
 /**
  * Runtime callbacks used by the walkthrough engine.
  */
-export interface WalkConfig {
+export interface WalkitConfig {
   /**
    * Called when the walkthrough starts.
    */
@@ -300,18 +300,18 @@ export interface WalkConfig {
    * @param step - the newly active step
    * @param index - zero-based index of the newly active step
    */
-  onStepChange?: (step: WalkStepData, index: number) => void;
+  onStepChange?: (step: WalkitStepData, index: number) => void;
 }
 
 // ─── Provider props ───────────────────────────────────────────────────────────
 
 /**
- * Props accepted by `<WalkProvider />`.
+ * Props accepted by `<WalkitProvider />`.
  *
  * The provider owns the walkthrough state, renders the overlay layer,
- * and exposes control methods through `useWalk()`.
+ * and exposes control methods through `useWalkit()`.
  */
-export interface WalkProviderProps {
+export interface WalkitProviderProps {
   /**
    * Application subtree that can register walkthrough steps.
    */
@@ -325,14 +325,14 @@ export interface WalkProviderProps {
   /**
    * Theme overrides for the default popover UI.
    */
-  theme?: WalkTheme;
+  theme?: WalkitTheme;
 
   /**
    * Additional style overrides applied to the default popover shell.
    *
    * Prefer a more specific type later if web and native props diverge.
    */
-  walkStyle?: object;
+  walkitStyle?: object;
 
   /**
    * Color of the walkthrough overlay mask.
@@ -358,7 +358,7 @@ export interface WalkProviderProps {
   /**
    * Labels used by the default popover controls.
    */
-  labels?: WalkLabels;
+  labels?: WalkitLabels;
 
   /**
    * Custom popover renderer.
@@ -366,7 +366,7 @@ export interface WalkProviderProps {
    * When provided, the default popover UI is replaced and the consumer
    * becomes responsible for the content structure and styling.
    */
-  renderPopover?: (props: RenderWalkStepProps) => ReactNode;
+  renderPopover?: (props: RenderWalkitStepProps) => ReactNode;
 
   /**
    * Called when the walkthrough starts.
@@ -381,17 +381,17 @@ export interface WalkProviderProps {
   /**
    * Called whenever the active step changes.
    */
-  onStepChange?: (walkStep: WalkStepData, index: number) => void;
+  onStepChange?: (walkitStep: WalkitStepData, index: number) => void;
 }
 
 // ─── Step props ───────────────────────────────────────────────────────────────
 
 /**
- * Props accepted by `<WalkStep />`.
+ * Props accepted by `<WalkitStep />`.
  *
- * A walk step wraps the target element that should be measured and highlighted.
+ * A Walkit step wraps the target element that should be measured and highlighted.
  */
-export interface WalkStepProps {
+export interface WalkitStepProps {
   /**
    * Unique identifier of the step.
    */
@@ -410,7 +410,7 @@ export interface WalkStepProps {
   /**
    * Optional body text displayed in the default popover.
    */
-  text?: string;
+  content?: string;
 
   /**
    * Preferred popover placement for this step.
@@ -440,7 +440,7 @@ export interface WalkStepProps {
    *
    * Wrapper element used when `asChild` is not enabled.
    */
-  wrapperElement?: "div" | "span";
+  wrapperElement?: 'div' | 'span';
 
   /**
    * Web only.
@@ -465,15 +465,15 @@ export interface WalkStepProps {
   onBeforeShow?: () => void | Promise<void>;
 }
 
-// ─── useWalk return ───────────────────────────────────────────────────────────
+// ─── useWalkit return ───────────────────────────────────────────────────────────
 
 /**
- * Public API returned by `useWalk()`.
+ * Public API returned by `useWalkit()`.
  *
  * These methods and values let consumers control and inspect the current
  * walkthrough state.
  */
-export interface UseWalkReturn {
+export interface UseWalkitReturn {
   /**
    * Starts the walkthrough.
    *
@@ -505,7 +505,7 @@ export interface UseWalkReturn {
   /**
    * Currently active step or `null` when the walkthrough is not running.
    */
-  currentStep: WalkStepData | null;
+  currentStep: WalkitStepData | null;
 
   /**
    * Current measured rectangle of the active target.
@@ -543,11 +543,11 @@ export interface UseWalkReturn {
 /**
  * Internal context contract used by the walkthrough provider and hooks.
  */
-export interface WalkContextValue {
+export interface WalkitContextValue {
   /**
    * Registered steps sorted by `order`.
    */
-  sortedSteps: WalkStepData[];
+  sortedSteps: WalkitStepData[];
 
   /**
    * Zero-based index of the active step.
@@ -557,7 +557,7 @@ export interface WalkContextValue {
   /**
    * Currently active step.
    */
-  currentStep: WalkStepData | null;
+  currentStep: WalkitStepData | null;
 
   /**
    * Current measured rectangle of the active target.
@@ -572,12 +572,12 @@ export interface WalkContextValue {
   /**
    * Runtime callbacks and lifecycle configuration.
    */
-  config: WalkConfig;
+  config: WalkitConfig;
 
   /**
    * Registers a step in the provider state.
    */
-  registerStep: (step: WalkStepData) => void;
+  registerStep: (step: WalkitStepData) => void;
 
   /**
    * Unregisters a step by name.
@@ -600,7 +600,7 @@ export interface WalkContextValue {
    * The optional `steps` argument is used internally to work with a stable
    * sorted snapshot during transitions.
    */
-  next: (steps?: WalkStepData[]) => Promise<void>;
+  next: (steps?: WalkitStepData[]) => Promise<void>;
 
   /**
    * Moves to the previous step.
@@ -608,7 +608,7 @@ export interface WalkContextValue {
    * The optional `steps` argument is used internally to work with a stable
    * sorted snapshot during transitions.
    */
-  prev: (steps?: WalkStepData[]) => Promise<void>;
+  prev: (steps?: WalkitStepData[]) => Promise<void>;
 
   /**
    * Navigates to a specific step index.
@@ -620,7 +620,7 @@ export interface WalkContextValue {
    *
    * This is primarily an internal orchestration method.
    */
-  measureAndShow: (index: number, steps: WalkStepData[]) => Promise<void>;
+  measureAndShow: (index: number, steps: WalkitStepData[]) => Promise<void>;
 }
 
 // ─── Overlay shared props ─────────────────────────────────────────────────────
@@ -645,17 +645,17 @@ export interface OverlayProps {
   /**
    * Currently active step.
    */
-  currentWalkStep: WalkStepData | null;
+  currentWalkitStep: WalkitStepData | null;
 
   /**
    * Zero-based index of the active step.
    */
-  walkStepIndex: number;
+  walkitStepIndex: number;
 
   /**
    * Total number of registered steps.
    */
-  totalWalkSteps: number;
+  totalWalkitSteps: number;
 
   /**
    * Animation preset used by the active popover.
@@ -680,17 +680,17 @@ export interface OverlayProps {
   /**
    * Theme overrides for the default popover UI.
    */
-  theme?: WalkTheme;
+  theme?: WalkitTheme;
 
   /**
    * Style overrides for the default popover shell.
    */
-  walkStyle?: object;
+  walkitStyle?: object;
 
   /**
    * Custom popover renderer.
    */
-  renderPopover?: (props: RenderWalkStepProps) => ReactNode;
+  renderPopover?: (props: RenderWalkitStepProps) => ReactNode;
 
   /**
    * Whether clicking or pressing outside should stop the walkthrough.
@@ -700,7 +700,7 @@ export interface OverlayProps {
   /**
    * Labels used by the default popover controls.
    */
-  labels: WalkLabels;
+  labels: WalkitLabels;
 
   /**
    * Advances to the next step.
@@ -718,31 +718,31 @@ export interface OverlayProps {
   onStop: () => void;
 }
 
-// ─── WalkStep shared props ─────────────────────────────────────────────────────
+// ─── WalkitStep shared props ─────────────────────────────────────────────────────
 
 /**
  * Shared props passed to the built-in walkthrough popover component.
  */
-export interface WalkPopoverProps {
+export interface WalkitPopoverProps {
   /**
    * Currently active step data.
    */
-  walkStep: WalkStepData;
+  walkitStep: WalkitStepData;
 
   /**
    * Zero-based index of the active step.
    */
-  walkStepIndex: number;
+  walkitStepIndex: number;
 
   /**
    * Total number of registered steps.
    */
-  totalWalkSteps: number;
+  totalWalkitSteps: number;
 
   /**
    * Final computed popover position.
    */
-  walkStepPos: WalkStepPosition;
+  walkitStepPos: WalkitStepPosition;
 
   /**
    * Animation preset used by the popover.
@@ -752,22 +752,22 @@ export interface WalkPopoverProps {
   /**
    * Theme overrides for the default popover UI.
    */
-  theme?: WalkTheme;
+  theme?: WalkitTheme;
 
   /**
    * Additional style overrides for the default popover shell.
    */
-  walkStyle?: object;
+  walkitStyle?: object;
 
   /**
    * Custom popover renderer.
    */
-  renderPopover?: (props: RenderWalkStepProps) => ReactNode;
+  renderPopover?: (props: RenderWalkitStepProps) => ReactNode;
 
   /**
    * Labels used by the default action controls.
    */
-  labels: WalkLabels;
+  labels: WalkitLabels;
 
   /**
    * Advances to the next step.

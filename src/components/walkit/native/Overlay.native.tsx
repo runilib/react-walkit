@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -7,15 +7,15 @@ import {
   StatusBar,
   StyleSheet,
   TouchableWithoutFeedback,
-  View,
-} from "react-native";
-import Svg, { Defs, Mask, Rect } from "react-native-svg";
-import { getSpotlightRect } from "src/utils/positioning.shared";
-import { computeTooltipPosition } from "src/utils/Walk.positioning";
-import type { OverlayProps, SpotlightRect } from "../../../types/Walk.types";
-import { NativeTooltip } from "./Walk.native";
+} from 'react-native';
 
-const { width: SW, height: SH } = Dimensions.get("window");
+import Svg, { Defs, Mask, Rect } from 'react-native-svg';
+import { getSpotlightRect } from 'src/utils/positioning.shared';
+import { computeTooltipPosition } from 'src/utils/Walkit.positioning';
+import type { OverlayProps, SpotlightRect } from '../../../types/Walkit.types';
+import { NativeTooltip } from './Walkit.native';
+
+const { width: SW, height: SH } = Dimensions.get('window');
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
@@ -28,15 +28,15 @@ function easeOut(t: number): number {
 export const NativeOverlay = ({
   visible,
   currentRect,
-  currentWalkStep,
-  walkStepIndex,
-  totalWalkSteps,
+  currentWalkitStep,
+  walkitStepIndex,
+  totalWalkitSteps,
   animationType,
   overlayColor,
   spotlightPadding,
   spotlightBorderRadius,
   theme,
-  walkStyle,
+  walkitStyle,
   renderPopover,
   stopOnOutsideClick,
   labels,
@@ -50,24 +50,30 @@ export const NativeOverlay = ({
   const prevRef = useRef<SpotlightRect | null>(null);
   const rafRef = useRef<number>(0);
 
-  const walkStepPos = useMemo(() => {
-    if (!currentRect || !currentWalkStep) {
+  const walkitStepPos = useMemo(() => {
+    if (!currentRect || !currentWalkitStep) {
       return null;
     }
 
     return computeTooltipPosition(
       getSpotlightRect(currentRect, spotlightPadding, spotlightBorderRadius),
       tooltipSize,
-      currentWalkStep.placement ?? "auto",
+      currentWalkitStep.placement ?? 'auto',
       SW,
-      SH
+      SH,
     );
-  }, [currentRect, currentWalkStep, spotlightPadding, spotlightBorderRadius, tooltipSize]);
+  }, [
+    currentRect,
+    currentWalkitStep,
+    spotlightPadding,
+    spotlightBorderRadius,
+    tooltipSize,
+  ]);
 
   useEffect(() => {
     Animated.timing(overlayOpacity, {
       toValue: visible ? 1 : 0,
-      duration: Platform.OS === "android" ? 100 : 280,
+      duration: Platform.OS === 'android' ? 100 : 280,
       useNativeDriver: true,
     }).start();
   }, [visible, overlayOpacity]);
@@ -81,7 +87,7 @@ export const NativeOverlay = ({
 
     cancelAnimationFrame(rafRef.current);
 
-    if (Platform.OS === "android") {
+    if (Platform.OS === 'android') {
       setSpot(target);
       prevRef.current = target;
       return;
@@ -117,7 +123,7 @@ export const NativeOverlay = ({
     return null;
   }
 
-  const fill = overlayColor ?? "rgba(15,15,25,0.75)";
+  const fill = overlayColor ?? 'rgba(15,15,25,0.75)';
 
   return (
     <Modal
@@ -127,14 +133,27 @@ export const NativeOverlay = ({
       statusBarTranslucent
       onRequestClose={onStop}
     >
-      <StatusBar translucent backgroundColor="transparent" />
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+      />
 
       <Animated.View style={[StyleSheet.absoluteFill, { opacity: overlayOpacity }]}>
         <TouchableWithoutFeedback onPress={stopOnOutsideClick ? onStop : undefined}>
-          <Svg width={SW} height={SH} style={StyleSheet.absoluteFill}>
+          <Svg
+            width={SW}
+            height={SH}
+            style={StyleSheet.absoluteFill}
+          >
             <Defs>
               <Mask id="uc-native-mask">
-                <Rect x={0} y={0} width={SW} height={SH} fill="white" />
+                <Rect
+                  x={0}
+                  y={0}
+                  width={SW}
+                  height={SH}
+                  fill="white"
+                />
                 {spot && (
                   <Rect
                     x={spot.x}
@@ -148,7 +167,14 @@ export const NativeOverlay = ({
               </Mask>
             </Defs>
 
-            <Rect x={0} y={0} width={SW} height={SH} fill={fill} mask="url(#uc-native-mask)" />
+            <Rect
+              x={0}
+              y={0}
+              width={SW}
+              height={SH}
+              fill={fill}
+              mask="url(#uc-native-mask)"
+            />
 
             {spot && (
               <Rect
@@ -165,15 +191,15 @@ export const NativeOverlay = ({
           </Svg>
         </TouchableWithoutFeedback>
 
-        {walkStepPos && currentWalkStep && (
+        {walkitStepPos && currentWalkitStep && (
           <NativeTooltip
-            walkStep={currentWalkStep}
-            walkStepIndex={walkStepIndex}
-            totalWalkSteps={totalWalkSteps}
-            walkStepPos={walkStepPos}
+            walkitStep={currentWalkitStep}
+            walkitStepIndex={walkitStepIndex}
+            totalWalkitSteps={totalWalkitSteps}
+            walkitStepPos={walkitStepPos}
             animationType={animationType}
             theme={theme}
-            walkStyle={walkStyle}
+            walkitStyle={walkitStyle}
             renderPopover={renderPopover}
             labels={labels}
             onNext={onNext}
@@ -184,7 +210,10 @@ export const NativeOverlay = ({
               const nextHeight = Math.ceil(layout.height);
 
               setTooltipSize((previousSize) => {
-                if (previousSize.width === nextWidth && previousSize.height === nextHeight) {
+                if (
+                  previousSize.width === nextWidth &&
+                  previousSize.height === nextHeight
+                ) {
                   return previousSize;
                 }
 

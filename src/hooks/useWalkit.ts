@@ -1,13 +1,13 @@
-import { useWalkContext } from "../context/WalkContext";
-import type { UseWalkReturn } from "../types/Walk.types";
+import { useWalkitContext } from '../context/WalkitContext';
+import type { UseWalkitReturn } from '../types/Walkit.types';
 
 /**
- * `useWalk` — main hook to control the onboarding tour.
+ * `useWalkit` — main hook to control the onboarding tour.
  *
- * Must be used inside a `<WalkProvider>`.
+ * Must be used inside a `<WalkitProvider>`.
  *
  * @example
- * const { start, stop, isRunning, currentStep, totalSteps } = useWalk();
+ * const { start, stop, isRunning, currentStep, totalSteps } = useWalkit();
  *
  * // Start the tour from the beginning
  * <button onClick={() => start()}>Start Tour</button>
@@ -15,7 +15,7 @@ import type { UseWalkReturn } from "../types/Walk.types";
  * // Start from a specific step
  * <button onClick={() => start('my-step')}>Resume</button>
  */
-export function useWalk(): UseWalkReturn {
+export function useWalkit(): UseWalkitReturn {
   const {
     sortedSteps,
     currentIndex,
@@ -27,7 +27,7 @@ export function useWalk(): UseWalkReturn {
     next,
     prev,
     goTo,
-  } = useWalkContext();
+  } = useWalkitContext();
 
   return {
     start,

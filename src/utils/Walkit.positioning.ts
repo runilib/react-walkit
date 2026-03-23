@@ -1,36 +1,35 @@
-import type { Placement, SpotlightRect } from "../types/Walk.types";
-
+import type { Placement, SpotlightRect } from '../types/Walkit.types';
 import {
   computeFloatingPosition,
   type FloatingPositionResult,
   type SizeLike,
   WALK_POSITION_DEFAULTS,
-} from "./positioning.shared";
+} from './positioning.shared';
 
-export type WalkStepSize = SizeLike;
+export type WalkitStepSize = SizeLike;
 
-export type WalkPositionResult = {
+export type WalkitPositionResult = {
   top: number;
   left: number;
-  placement: Exclude<Placement, "auto">;
+  placement: Exclude<Placement, 'auto'>;
   arrowOffset: number;
 };
 
 /**
- * Walkthrough-compatible wrapper around the shared positioning engine.
+ * Walkitthrough-compatible wrapper around the shared positioning engine.
  *
  * Keeps the existing return shape (`arrowOffset`) to avoid regressions.
  */
 export function computeTooltipPosition(
   target: SpotlightRect,
-  walkStepSize: WalkStepSize,
+  walkitStepSize: WalkitStepSize,
   preferredPlacement: Placement,
   screenWidth: number,
-  screenHeight: number
-): WalkPositionResult {
+  screenHeight: number,
+): WalkitPositionResult {
   const result: FloatingPositionResult = computeFloatingPosition({
     targetRect: target,
-    floatingSize: walkStepSize,
+    floatingSize: walkitStepSize,
     preferredPlacement,
     screenWidth,
     screenHeight,

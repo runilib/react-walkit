@@ -1,20 +1,21 @@
-import React, {
+import type React from 'react';
+import {
   Children,
   cloneElement,
   isValidElement,
-  PropsWithChildren,
+  type PropsWithChildren,
   type ReactElement,
   useCallback,
   useEffect,
   useRef,
-} from "react";
+} from 'react';
 
-import { useWalkContext } from "../../context/WalkContext";
-import type { TargetRect, WalkStepProps } from "../../types/Walk.types";
+import { useWalkitContext } from '../../context/WalkitContext';
+import type { TargetRect, WalkitStepProps } from '../../types/Walkit.types';
 
 type RefableChildProps = {
   ref?: React.Ref<HTMLElement>;
-  "data-runilib-react-walkit-step"?: string;
+  'data-runilib-react-walkit-step'?: string;
 };
 
 const VIEWPORT_MARGIN = 16;
@@ -47,22 +48,22 @@ function waitForScrollToSettle(waitMs = DEFAULT_SCROLL_WAIT_MS): Promise<void> {
   });
 }
 
-export function WalkStep({
+export function WalkitStep({
   children,
   id,
   order,
   title,
-  text,
-  placement = "auto",
+  content,
+  placement = 'auto',
   active = true,
   asChild = false,
-  wrapperElement = "div",
+  wrapperElement = 'div',
   wrapperClassName,
   wrapperStyle,
   onBeforeShow,
-}: Readonly<PropsWithChildren<WalkStepProps>>): React.ReactElement {
+}: Readonly<PropsWithChildren<WalkitStepProps>>): React.ReactElement {
   const targetElementRef = useRef<HTMLElement | null>(null);
-  const { registerStep, unregisterStep } = useWalkContext();
+  const { registerStep, unregisterStep } = useWalkitContext();
 
   const setTargetElementRef = useCallback((element: HTMLElement | null) => {
     targetElementRef.current = element;
@@ -72,7 +73,7 @@ export function WalkStep({
     const element = targetElementRef.current;
 
     if (!element) {
-      throw new Error(`[@runilib/react-walkit] ref not attached for step "${name}"`);
+      throw new Error(`[@runilib/react-walkit] ref not attached for step "${id}"`);
     }
 
     const rect = element.getBoundingClientRect();
@@ -83,7 +84,7 @@ export function WalkStep({
       width: rect.width,
       height: rect.height,
     };
-  }, [name]);
+  }, [id]);
 
   const ensureVisible = useCallback(async (): Promise<void> => {
     if (onBeforeShow) {
@@ -102,9 +103,9 @@ export function WalkStep({
     }
 
     element.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-      inline: "nearest",
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'nearest',
     });
 
     await waitForScrollToSettle();
@@ -120,7 +121,7 @@ export function WalkStep({
       id,
       order,
       title,
-      text,
+      content,
       placement,
       measure,
       ensureVisible,
@@ -133,11 +134,11 @@ export function WalkStep({
     active,
     ensureVisible,
     measure,
-    name,
+    id,
     order,
     placement,
     registerStep,
-    text,
+    content,
     title,
     unregisterStep,
   ]);
@@ -145,7 +146,7 @@ export function WalkStep({
   if (asChild) {
     if (!isValidElement(children)) {
       throw new Error(
-        `[@runilib/react-walkit] WalkStep "${id}" with asChild expects a single valid React element child.`
+        `[@runilib/react-walkit] WalkitStep "${id}" with asChild expects a single valid React element child.`,
       );
     }
 
@@ -153,11 +154,11 @@ export function WalkStep({
 
     return cloneElement(onlyChild, {
       ref: setTargetElementRef,
-      "data-runilib-react-walkit-step": id,
+      'data-runilib-react-walkit-step': id,
     });
   }
 
-  if (wrapperElement === "span") {
+  if (wrapperElement === 'span') {
     return (
       <span
         ref={setTargetElementRef}
@@ -173,7 +174,7 @@ export function WalkStep({
   return (
     <div
       ref={setTargetElementRef}
-      data-runilib-react-walkit-step={name}
+      data-runilib-react-walkit-step={id}
       className={wrapperClassName}
       style={wrapperStyle}
     >
