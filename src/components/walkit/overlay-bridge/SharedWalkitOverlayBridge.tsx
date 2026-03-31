@@ -1,7 +1,7 @@
 import { type ComponentType, useCallback } from 'react';
 
-import { useWalkitContext } from '../../context/WalkitContext';
-import type { OverlayProps } from '../../types/Walkit.types';
+import { useWalkitContext } from '../../../context/WalkitContext';
+import type { OverlayProps } from '../../../types/Walkit.types';
 
 export type BridgeProps = Omit<
   OverlayProps,
@@ -24,7 +24,7 @@ export function SharedWalkitOverlayBridge({
   ...props
 }: SharedBridgeProps) {
   const {
-    sortedSteps,
+    totalSteps,
     currentIndex,
     currentStep,
     currentRect,
@@ -35,12 +35,12 @@ export function SharedWalkitOverlayBridge({
   } = useWalkitContext();
 
   const handleNext = useCallback(() => {
-    next(sortedSteps);
-  }, [next, sortedSteps]);
+    next();
+  }, [next]);
 
   const handlePrev = useCallback(() => {
-    prev(sortedSteps);
-  }, [prev, sortedSteps]);
+    prev();
+  }, [prev]);
 
   const overlayProps: OverlayProps = {
     ...props,
@@ -48,7 +48,8 @@ export function SharedWalkitOverlayBridge({
     currentRect,
     currentWalkitStep: currentStep,
     walkitStepIndex: currentIndex,
-    totalWalkitSteps: sortedSteps.length,
+    totalWalkitSteps: totalSteps,
+    renderPopover: currentStep?.renderPopover ?? props.renderPopover,
     onNext: handleNext,
     onPrev: handlePrev,
     onStop: stop,

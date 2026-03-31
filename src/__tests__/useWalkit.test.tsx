@@ -1,24 +1,29 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
-import { act, render } from '@testing-library/react';
-import {
-  StepwiseContextProvider,
-  useStepwiseContext,
-} from '../../src/context/StepwiseContext';
-import { useStepwise } from '../../src/hooks/useStepwise';
-import type { StepwiseContextValue, StepwiseStepData, UseStepwiseReturn } from '../types';
+import { act, render, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { useWalkitContext, WalkitContextProvider } from '../context/WalkitContext';
+import { useWalkit } from '../hooks/useWalkit';
+import type {
+  UseWalkitReturn,
+  WalkitContextValue,
+  WalkitStepData,
+} from '../types/Walkit.types';
+import { withWalkitSequence } from '../utils/sequence';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function makeStep(name: string, order: number): StepwiseStepData {
-  return {
-    name,
-    order,
-    title: `Title ${order}`,
-    text: `Text ${order}`,
-    placement: 'auto',
-    measure: () => Promise.resolve({ x: 0, y: 0, width: 80, height: 40 }),
-  };
+function makeStep(id: string, sequence: number): WalkitStepData {
+  return withWalkitSequence(
+    {
+      id,
+      title: `Title ${sequence}`,
+      content: `Text ${sequence}`,
+      placement: 'auto',
+      measure: () => Promise.resolve({ x: 0, y: 0, width: 80, height: 40 }),
+    },
+    sequence,
+  );
 }
 
 /** Captures both the public hook API and the raw context (for registerStep). */
@@ -26,25 +31,25 @@ function Harness({
   onApi,
   onCtx,
 }: {
-  onApi: (api: UseStepwiseReturn) => void;
-  onCtx: (ctx: StepwiseContextValue) => void;
+  onApi: (api: UseWalkitReturn) => void;
+  onCtx: (ctx: WalkitContextValue) => void;
 }) {
-  const api = useStepwise();
-  const ctx = useStepwiseContext();
+  const api = useWalkit();
+  const ctx = useWalkitContext();
   useEffect(() => {
     onApi(api);
     onCtx(ctx);
-  });
+  }, [api, ctx, onApi, onCtx]);
   return null;
 }
 
 async function setup(config = {}) {
-  let api!: UseStepwiseReturn;
-  let ctx!: StepwiseContextValue;
+  let api!: UseWalkitReturn;
+  let ctx!: WalkitContextValue;
 
   await act(async () => {
     render(
-      <StepwiseContextProvider config={config}>
+      <WalkitContextProvider config={config}>
         <Harness
           onApi={(a) => {
             api = a;
@@ -53,7 +58,7 @@ async function setup(config = {}) {
             ctx = c;
           }}
         />
-      </StepwiseContextProvider>,
+      </WalkitContextProvider>,
     );
   });
 
@@ -122,8 +127,10 @@ describe('useWalkit', () => {
     await act(async () => {
       getApi().next();
     });
-    expect(getApi().currentIndex).toBe(1);
-    expect(getApi().currentStep?.name).toBe('b');
+    await waitFor(() => {
+      expect(getApi().currentIndex).toBe(1);
+      expect(getApi().currentStep?.id).toBe('b');
+    });
   });
 
   it('prev() decrements currentIndex', async () => {
@@ -139,7 +146,9 @@ describe('useWalkit', () => {
     await act(async () => {
       getApi().prev();
     });
-    expect(getApi().currentIndex).toBe(0);
+    await waitFor(() => {
+      expect(getApi().currentIndex).toBe(0);
+    });
   });
 
   it('goTo() jumps directly to the index', async () => {
@@ -168,7 +177,7 @@ describe('useWalkit', () => {
   });
 
   it('calls onStart when tour starts', async () => {
-    const onStart = jest.fn();
+    const onStart = vi.fn();
     const { getApi, getCtx } = await setup({ onStart });
     await act(async () => {
       getCtx().registerStep(makeStep('a', 1));
@@ -178,7 +187,7 @@ describe('useWalkit', () => {
   });
 
   it('calls onStop when tour stops', async () => {
-    const onStop = jest.fn();
+    const onStop = vi.fn();
     const { getApi, getCtx } = await setup({ onStop });
     await act(async () => {
       getCtx().registerStep(makeStep('a', 1));
@@ -191,12 +200,43 @@ describe('useWalkit', () => {
   });
 
   it('throws when used outside WalkitProvider', () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    class ErrorBoundary extends React.Component<
+      React.PropsWithChildren,
+      { error: Error | null }
+    > {
+      state = { error: null as Error | null };
+
+      static getDerivedStateFromError(error: Error) {
+        return { error };
+      }
+
+      render() {
+        if (this.state.error) {
+          return <p>{this.state.error.message}</p>;
+        }
+
+        return this.props.children;
+      }
+    }
+
     function Broken() {
-      useStepwise();
+      useWalkit();
       return null;
     }
-    expect(() => render(<Broken />)).toThrow('[universal-copilot]');
+
+    const { getByText } = render(
+      <ErrorBoundary>
+        <Broken />
+      </ErrorBoundary>,
+    );
+
+    expect(
+      getByText(
+        '[runilib/react-walkit] useWalkitContext must be used inside <WalkitProvider>.',
+      ),
+    ).toBeTruthy();
     spy.mockRestore();
   });
 });
