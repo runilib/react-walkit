@@ -153,7 +153,7 @@ describe('WalkitStep (web)', () => {
     expect(step.placement).toBe('bottom');
   });
 
-  it('attaches data-copilot-step attribute to the child element', async () => {
+  it('attaches data-walkit-step attribute to the child element', async () => {
     const { container } = render(
       <WalkitContextProvider config={{}}>
         <WalkitStep
